@@ -2,3 +2,4 @@
 
 DockerDeliveryPipeline {
     platform = "shared-library"
+}
