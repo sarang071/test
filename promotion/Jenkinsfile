@@ -1,0 +1,41 @@
+def call(body) {
+    def config = [:]
+    body.resolveStrategy = Closure.DELEGATE_FIRST
+    body.delegate = config
+    body()
+pipeline {
+    agent any
+    environment{
+        RegistryURL = "https://registry.hub.docker.com/"
+        RepoNameDev = "sarangp007/sample-nginx-dev"
+        RepoNameQA = "sarangp007/sample-nginx-qa"
+        RepoNameStage = "sarangp007/sample-nginx-stage"
+        RepoNameProd = "sarangp007/sample-nginx-prod"
+        dh_creds = 'dockerhub_creds'
+    }
+    stages{
+        stage('Builing image') {
+            environment{
+                registry_endpoint = "${env.RegistryURL}" + "${env.RepoName}"
+                tag = "${env.RepoName}" + ':' + "$GIT_COMMIT"
+               // file_path = "${workspace}/docker/"
+            }
+            steps{
+                script{
+                     docker.withRegistry(registry_endpoint, dh_creds) {
+
+                     def Image = docker.build(tag,/* file_path*/)
+
+                     /* Push the container to the custom Registry */
+                     Image.push()
+
+                 }
+            }
+
+        }
+    }
+    
+    }
+  
+}
+}
